@@ -1,0 +1,12 @@
+*.DS_Store
+# Hide virtualenv
+venv/
+
+# Hide compiled python files
+*.pyc
+__pycache__/
+
+build/
+dist/
+drv_*.egg-info/
+local/
