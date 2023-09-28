@@ -1,2 +1,3 @@
 packaging
 rpm
+pykickstart
