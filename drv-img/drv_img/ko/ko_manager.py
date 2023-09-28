@@ -2,7 +2,7 @@
 
 import os
 from drv_img.utils.logger import logger
-import drv_img.utils.run_cmd as run_cmd
+from drv_img.utils import run_cmd
 
 
 class KOManager:
@@ -12,7 +12,6 @@ class KOManager:
     The class can check the compatibility of the kernel objects with current
     kernel version and manage their installation.
     """
-
     def __init__(self, work_dir, ko_list):
         """Initialize with working directory and list of kernel objects."""
         self._work_dir = work_dir
@@ -52,9 +51,8 @@ class KOManager:
         if module_compatibility == self._kernel_version:
             return True
 
-        logger.warning(
-            f"module {module_path} is not exactly compatible with kernel {self._kernel_version}"
-        )
+        logger.warning("module %s is not exactly compatible with kernel %s",
+                       module_path, self._kernel_version)
         print(
             f"module {module_path} is not exactly compatible with kernel {self._kernel_version}"
         )
@@ -84,12 +82,13 @@ class KOManager:
 
     def install_all_ko(self):
         """Install all compatible kernel objects in the list."""
-        _to_install = self.check_can_install()
-        for ko in _to_install:
-            print(f"Installing {ko} to {self._work_dir}")
-            if not self.install_ko(ko):
-                logger.error(
-                    f"Install ko package {ko} to {self._work_dir} failed!")
-                raise Exception(
-                    f"Install ko package {ko} to {self._work_dir} failed!")
+        to_install = self.check_can_install()
+        for kernel_module in to_install:
+            print(f"Installing {kernel_module} to {self._work_dir}")
+            if not self.install_ko(kernel_module):
+                logger.error("Install ko package %s to %s failed!",
+                             kernel_module, self._work_dir)
+                raise ValueError(
+                    f"Install ko package {kernel_module} to {self._work_dir} failed!"
+                )
         return True

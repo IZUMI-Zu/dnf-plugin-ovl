@@ -1,13 +1,14 @@
 """
 This module is designed to handle RPM (Red Hat Package Manager) file 
-operations mainly to manage dependencies, comparing versions and checking for installation requirements.
+operations mainly to manage dependencies, comparing versions and 
+checking for installation requirements.
 """
 
-from packaging import version
 import re
 import collections
+from packaging import version
 import rpm as lib_rpm
-import drv_img.utils.run_cmd as run_cmd
+from drv_img.utils import run_cmd
 from drv_img.utils.logger import logger
 
 
@@ -36,7 +37,6 @@ class RpmManager:
     can_install(rpm_list)
         Returns a tuple with list of packages that can be installed and cannot be installed.
     """
-
     def __init__(self, work_dir, file_path="/root/lorax-packages.log"):
         self.installed_packages = self.get_installed_packages_from_file(
             work_dir + file_path)
@@ -46,10 +46,10 @@ class RpmManager:
         match = re.match(r'(.+)-([^-]+)-(.+)\.((x86_64)|(noarch)|(aarch64))',
                          line.strip())
         if match:
-            name, version, release, arch, _, _, _ = match.groups()
+            name, rpm_version, release, arch, _, _, _ = match.groups()
             return {
                 'name': name,
-                'version': version,
+                'version': rpm_version,
                 "release": release,
                 'arch': arch,
             }
@@ -80,10 +80,10 @@ class RpmManager:
         file_path (str): Path to the file from which installed packages information is to be read.
 
         Returns:
-        list: A list of dictionaries each containing the installed package name, version, release, and 
-              architecture information.
+        list: A list of dictionaries each containing the installed package name, version, 
+              release, and architecture information.
         """
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             lines = file.readlines()
         return self._parse_packages(lines)
 
@@ -115,14 +115,16 @@ class RpmManager:
         line (str): The line string from which operator and version is to be identified.
 
         Returns:
-        tuple: A tuple containing three elements (name, operator, version) where 'name' is the string 
-               before the operator, 'operator' is the operator found, and 'version' is the string after 
-               the operator. If no operator is found, the operator and version will be None.
+        tuple: A tuple containing three elements (name, operator, version) where 'name' is 
+               the string before the operator, 'operator' is the operator found, and 'version'
+               is the string after the operator. If no operator is found, the operator and 
+               version will be None.
         """
-        for op in self.operators:
-            if op in line:
-                splitted = line.split(op)
-                return splitted[0].strip(), op, splitted[1].strip()
+        for operator_symbol in self.operators:
+            if operator_symbol in line:
+                splitted = line.split(operator_symbol)
+                return splitted[0].strip(), operator_symbol, splitted[1].strip(
+                )
         return line.strip(), None, None
 
     def _is_special_dependency(self, dependency_name):
@@ -146,10 +148,11 @@ class RpmManager:
         rpm_package (str): The name of the rpm package for which dependencies are to be retrieved.
 
         Returns:
-        dict or None: A dictionary containing the dependencies of the package, if found; Otherwise, None.
+        dict or None: A dictionary containing the dependencies of the package, 
+        if found; Otherwise, None.
         """
         dependencies_result = collections.defaultdict(list)
-        # TODO: change it to a better way as it depepnds on host machine's database
+        # TODO: change it to a better way as it depends on host machine's database
         output = run_cmd.rpm_check_dependency(rpm_package)
 
         if output is None:
@@ -161,7 +164,7 @@ class RpmManager:
                 if line.startswith('/'):  # ignore lines starting with a '/'
                     continue
 
-                dependency_name, operator, version = self._search_operator_version(
+                dependency_name, operator, dependency_version = self._search_operator_version(
                     line)
 
                 # ignore special dependencies
@@ -178,7 +181,7 @@ class RpmManager:
                         "operator":
                         operator,
                         "version":
-                        version
+                        dependency_version
                     })
 
         logger.info("Package %s has dependencies: %s", rpm_package,
@@ -246,7 +249,6 @@ class RpmManager:
         Returns tuple with list of installable RPMs and 
         list of RPMs that cannot be installed with their unsatisfied dependencies.
         """
-
         def get_rpm_info(rpm_path):
             """Helper function to extract information from a RPM file"""
             ts = lib_rpm.TransactionSet()

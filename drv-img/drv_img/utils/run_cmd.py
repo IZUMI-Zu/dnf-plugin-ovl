@@ -111,12 +111,10 @@ def exec_readlines(command,
                    root='/',
                    env_prune=None,
                    filter_stderr=False):
-
     class ExecLineReader(object):
         """Iterator class for returning lines from a process and cleaning
            up the process when the output is no longer needed.
         """
-
         def __init__(self, proc, argv):
             self._proc = proc
             self._argv = argv

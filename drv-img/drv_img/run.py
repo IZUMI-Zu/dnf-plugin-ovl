@@ -48,8 +48,8 @@ def check_exist_workdir():
     """
     Check if the work directory exists.
 
-    Asserts the existence of the work directory, and if it doesn't exist, creates it. If the path exists but is not a 
-    directory, it logs an error and exits the program.
+    Asserts the existence of the work directory, and if it doesn't exist, creates it. 
+    If the path exists but is not a directory, it logs an error and exits the program.
     """
     work_dir = os.path.abspath(GlobalConfig.WORK_DIR)
     if not os.path.exists(work_dir):
@@ -134,9 +134,9 @@ def get_config_parser(parser):
         GlobalConfig.KERNEL_MODULES_PATH = parser.ko_path[0]
 
     check_exist_iso()
-    if not GlobalConfig.RPM_PATH == "":
+    if GlobalConfig.RPM_PATH != "":
         check_exist_rpm()
-    if not GlobalConfig.KERNEL_MODULES_PATH == "":
+    if GlobalConfig.KERNEL_MODULES_PATH != "":
         check_exist_ko()
     check_exist_workdir()
     check_exist_outdir()
@@ -220,7 +220,6 @@ def parser_argument(parser: argparse.ArgumentParser):
                                                sys.version,
                                                pathlib.Path().absolute(),
                                                time.ctime()))
-
     parser.set_defaults(func=process_with_replace_driver)
 
 
@@ -252,6 +251,11 @@ def clean_work_dir():
 
 
 def main():
+    """
+    The main function of the script. It parses the command line arguments, 
+    executes the function associated with the parsed arguments, and finally 
+    cleans up the working directory.
+    """
     parser = parse_cli()
     parser.func(parser)
     clean_work_dir()
