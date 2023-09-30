@@ -38,8 +38,9 @@ class KOManager:
         kernel version and configuration for which the module is valid.
         """
         module_compatibility_raw = run_cmd.get_module_vermagic(module_path)
-        print("module_path: module_compatibility_raw: ", module_path,
-              module_compatibility_raw)
+        print(
+            f"module_path: {module_path}, module_compatibility_raw: {module_compatibility_raw}"
+        )
         return self._process_version_string(module_compatibility_raw)
 
     def check_compatibility(self, module_path):

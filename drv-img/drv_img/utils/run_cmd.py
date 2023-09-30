@@ -637,8 +637,8 @@ def modprobe(kernel_version, work_dir, ko_base):
 
 def get_module_vermagic(module_path):
     try:
-        module_comp = exec_with_capture("modinfo",
-                                        ["-F", "vermagic", module_path])
+        module_comp = exec_with_capture(
+            "modinfo", ["-F", "vermagic", module_path]).strip()
         return module_comp
     except Exception as err:
         logger.error(err)
@@ -647,19 +647,12 @@ def get_module_vermagic(module_path):
 
 def get_kernel_version_with_chroot(root_dir):
     try:
-        current_kernel = exec_with_capture("chroot", [root_dir, 'uname', '-r'])
+        current_kernel = exec_with_capture("chroot",
+                                           [root_dir, 'uname', '-r']).strip()
         return current_kernel
     except Exception as err:
         logger.error(err)
         return ""
-
-
-# def cp_output_rpm(output_path):
-#     cp_catalog(macro.RPM_SRC_SETUP_RPMS_PATH + "/noarch", output_path)
-#     if GlobalConfig.ARCH == ArchType.X86_64:
-#         cp_catalog(macro.RPM_SRC_SETUP_RPMS_PATH + "/x86_64", output_path)
-#     elif GlobalConfig.ARCH == ArchType.ARM64:
-#         cp_catalog(macro.RPM_SRC_SETUP_RPMS_PATH + "/aarch64", output_path)
 
 
 def rpm_setup(rpm_path, dst_path='/'):
